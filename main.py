@@ -6,7 +6,7 @@
 # Allow the user to run the program multiple times
 # Validate whether the user entered valid data. If valid data isn't presented notify the user
 # Use the Requests library in order to request data from teh webservice
-# Use try blocks when establishing connections to the webservice. You must print a message to the user indicating whether or not the connection was successful
+# Use try blocks when establishing connections to the webservice. You must print a message to the user indicating whether or not the connection was successful.
 
 import json, requests
 
