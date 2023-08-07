@@ -25,6 +25,11 @@ class LocationWeather():
         try:
             response = requests.get(self.url)
             unformatted_data = response.json()
+            if 'message' in unformatted_data:
+                if unformatted_data['cod'] == '404':
+                    return 'Not Found'
+                else:
+                    raise Exception
         except Exception:
             return None
         else:
@@ -58,7 +63,9 @@ class LocationWeather():
     def display_weather(self):
         '''This calls the get_response_json and formatted/displays json data.'''
         json_data = self.get_response_json()
-        if json_data is None:
+        if json_data == 'Not Found':
+            print('Requested location was not found. Please check input and try again.')
+        elif json_data is None:
             print('Sorry, there was an error with retrieving weather. Please try again.')
         else:
             self.set_weather_attributes(json_data)     
@@ -79,7 +86,11 @@ class CityLocationWeather(LocationWeather):
         super().__init__()
         self.city = city
         self.state = state
-        self.url = f'{self.base_url}?q={self.city},{self.state},us&units=imperial&APPID={self.appid}'
+        # will utilize state in url if not blank
+        if self.state == '':
+            self.url = f'{self.base_url}?q={self.city}&units=imperial&APPID={self.appid}'
+        else:
+            self.url = f'{self.base_url}?q={self.city},{self.state},us&units=imperial&APPID={self.appid}'
     
 def isZipCode(zipcode):
     '''Checks to see if input is a zipcode. Returns True/False'''
@@ -94,7 +105,7 @@ def isZipCode(zipcode):
 
 def goAgain():
     '''Asks user if they wish to go again or quit'''
-    keep_going = input('Do you want to go search again? (y/n) ')
+    keep_going = input('Do you want to search again? (y/n) ')
     if keep_going.lower() == 'y' or keep_going.lower() == 'yes':
         return True
     elif keep_going.lower() == 'n' or keep_going.lower() == 'no':
@@ -102,17 +113,64 @@ def goAgain():
     else:
         goAgain()
 
+def isValidCityName(city_name):
+    '''Checks to see if the city name provided is valid.'''
+    # city name must not contain numeric characters
+    for character in city_name:
+        if character.isdigit():
+            return False
+    # city name must have at least one character
+    if len(city_name) == 0:
+        return False
+
+    return True
+
+def checkUSAState(state_name):
+    '''Checks if state provided is valid USA state or abbreviation.'''
+    if state_name.title().strip() in USAStateNames() or  state_name.upper().strip() in USAStateAbbreviations():
+        return state_name.strip()
+    else:
+        return ''      
+
+def USAStateNames():
+    '''Returns tuple of USA state names'''
+    state_names = ('Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+                   'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana',
+                   'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
+                   'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska',
+                   'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina',
+                   'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
+                   'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+                   'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming')
+    return state_names
+
+def USAStateAbbreviations():
+    '''Returns tupe of USA state abbreviations'''
+    state_abbreviations = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL',
+                           'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT',
+                           'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI',
+                           'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY')
+    return state_abbreviations
+
 def main():
     '''Main function'''
     program_running = True
     while program_running:
         location = input("Welcome. Please provide the city name or the zipcode for the location's weather: ")
+        # checks if input is a valid zip code first
         if isZipCode(location):
             weather = ZipCodeLocationWeather(location)
-        else:
+        # if not zip check if valid input for city name
+        elif isValidCityName(location):
             state = input("Please provide the city's state: ")
+            state = checkUSAState(state)
             weather = CityLocationWeather(location, state)
 
+        else:
+            print('Location selected is not a valid zipcode or city. Please try again.')
+            program_running = goAgain()
+            continue
+        
         weather.display_weather()
         program_running = goAgain()    
 
