@@ -8,7 +8,7 @@
 # Use the Requests library in order to request data from teh webservice
 # Use try blocks when establishing connections to the webservice. You must print a message to the user indicating whether or not the connection was successful.
 
-import json, requests
+import json, requests, csv
 
 class LocationWeather():
     '''Parent class LocationWeather'''
@@ -24,12 +24,12 @@ class LocationWeather():
         '''Sends request for response json'''
         try:
             response = requests.get(self.url)
-            unformatted_data = response.json()
-            if 'message' in unformatted_data:
-                if unformatted_data['cod'] == '404':
-                    return 'Not Found'
-                else:
-                    raise Exception
+            if response.status_code == 404:
+                return 'Not Found'
+            elif response.status_code >= 300:
+                raise Exception
+            else:
+                unformatted_data = response.json()
         except Exception:
             return None
         else:
@@ -64,10 +64,13 @@ class LocationWeather():
         '''This calls the get_response_json and formatted/displays json data.'''
         json_data = self.get_response_json()
         if json_data == 'Not Found':
+            print('Request to OpenWeatherMap was not successful.')
             print('Requested location was not found. Please check input and try again.')
         elif json_data is None:
+            print('Request to OpenWeatherMap was not successful.')
             print('Sorry, there was an error with retrieving weather. Please try again.')
         else:
+            print('Request to OpenWeatherMap was successful.')
             self.set_weather_attributes(json_data)     
             print(f'The current temperature is {self.get_temp()}.')
             print(f'The max temperature is {self.get_temp_max()}.')
@@ -127,30 +130,26 @@ def isValidCityName(city_name):
 
 def checkUSAState(state_name):
     '''Checks if state provided is valid USA state or abbreviation.'''
-    if state_name.title().strip() in USAStateNames() or  state_name.upper().strip() in USAStateAbbreviations():
+    if state_name.title().strip() in USAStateNames() or state_name.upper().strip() in USAStateAbbreviations():
         return state_name.strip()
     else:
         return ''      
 
 def USAStateNames():
     '''Returns tuple of USA state names'''
-    state_names = ('Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
-                   'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana',
-                   'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts',
-                   'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska',
-                   'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina',
-                   'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
-                   'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-                   'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming')
-    return state_names
+    with open('state_names.txt') as f:
+        reader = csv.reader(f, delimiter=',')
+        state_names = list(reader)
+
+    return tuple(state_names[0])
 
 def USAStateAbbreviations():
     '''Returns tupe of USA state abbreviations'''
-    state_abbreviations = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL',
-                           'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT',
-                           'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI',
-                           'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY')
-    return state_abbreviations
+    with open('state_abbreviations.txt') as f:
+        reader = csv.reader(f, delimiter=',')
+        state_abbreviations = list(reader)
+        
+    return tuple(state_abbreviations[0])
 
 def main():
     '''Main function'''
@@ -159,6 +158,8 @@ def main():
         location = input("Welcome. Please provide the city name or the zipcode for the location's weather: ")
         # checks if input is a valid zip code first
         if isZipCode(location):
+            # only pull first five digits of zip for query
+            location = location[:5]
             weather = ZipCodeLocationWeather(location)
         # if not zip check if valid input for city name
         elif isValidCityName(location):
