@@ -15,13 +15,14 @@ def is_zip_code(zipcode):
 
 def go_again():
     '''Asks user if they wish to go again or quit'''
-    keep_going = input('Do you want to search again? (y/n) ')
-    if keep_going.lower() == 'y' or keep_going.lower() == 'yes':
-        return True
-    elif keep_going.lower() == 'n' or keep_going.lower() == 'no':
-        return False
-    else:
-        go_again()
+    while True:
+        keep_going = input('Do you want to search again? (y/n) ')
+        if keep_going.lower() == 'y' or keep_going.lower() == 'yes':
+            return True
+        elif keep_going.lower() == 'n' or keep_going.lower() == 'no':
+            return False
+        else:
+            continue
 
 def is_valid_city_name(city_name):
     '''Checks to see if the city name provided is valid.'''

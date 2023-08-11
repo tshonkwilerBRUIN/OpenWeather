@@ -12,6 +12,8 @@ class LocationWeather():
         self.temp = None
         self.temp_max = None
         self.forecast = None
+        self.humidity = None
+        self.temp_min = None
 
     def get_response_json(self):
         '''Sends request for response json'''
@@ -41,17 +43,31 @@ class LocationWeather():
         '''Sets temp_max'''
         self.temp_max = temp_max
     def get_forecast(self):
-        '''Return forecast'''
+        '''Returns forecast'''
         return self.forecast
     def set_forecast(self, forecast):
         '''Sets forecast'''
         self.forecast = forecast
+    def get_humidity(self):
+        '''Returns humidity'''
+        return self.humidity
+    def set_humidity(self, humidity):
+        '''Sets humidity'''
+        self.humidity = humidity
+    def get_temp_min(self):
+        '''Returns temp_min'''
+        return self.temp_min
+    def set_temp_min(self, temp_min):
+        '''Sets temp_min'''
+        self.temp_min = temp_min
 
     def set_weather_attributes(self, weather_json):
         '''This pulls the info from the json response and sets values to attributes'''
         self.set_temp(weather_json['main']['temp'])
         self.set_temp_max(weather_json['main']['temp_max'])
         self.set_forecast(weather_json['weather'][0]['main'])
+        self.set_humidity(weather_json['main']['humidity'])
+        self.set_temp_min(weather_json['main']['temp_min'])
 
     def display_weather(self):
         '''This calls the get_response_json and formatted/displays json data.'''
@@ -64,10 +80,14 @@ class LocationWeather():
             print('Sorry, there was an error with retrieving weather. Please try again.')
         else:
             print('Request to OpenWeatherMap was successful.')
+            print()
             self.set_weather_attributes(json_data)     
             print(f'The current temperature is {self.get_temp()}.')
             print(f'The max temperature is {self.get_temp_max()}.')
+            print(f'The min temperature is {self.get_temp_min()}')
             print(f'The forcast is {self.get_forecast()}.')
+            print(f'The humidity is {self.get_humidity()}%.')
+            print()
 
 class ZipCodeLocationWeather(LocationWeather):
     '''Weather location by zip code, child of LocationWeather'''
