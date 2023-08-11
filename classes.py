@@ -6,6 +6,7 @@ import json, requests
 class LocationWeather():
     '''Parent class LocationWeather'''
     def __init__(self):
+        
         self.base_url = "https://api.openweathermap.org/data/2.5/weather"
         self.appid = "039cf388d6d9f7b3d3aa4207a4a92d7e"
         self.url = None
@@ -19,8 +20,10 @@ class LocationWeather():
         '''Sends request for response json'''
         try:
             response = requests.get(self.url)
+            # not found 404 code
             if response.status_code == 404:
                 return 'Not Found'
+            # codes 300 and above throw exception
             elif response.status_code >= 300:
                 raise Exception
             else:
@@ -29,31 +32,36 @@ class LocationWeather():
             return None
         else:
             return unformatted_data
-
+            
+    # temp
     def get_temp(self):
         '''Returns temp'''
         return self.temp
     def set_temp(self, temp):
         '''Sets temp'''
         self.temp = temp
+    # temp_max
     def get_temp_max(self):
         '''Returns temp_max'''
         return self.temp_max
     def set_temp_max(self, temp_max):
         '''Sets temp_max'''
         self.temp_max = temp_max
+    # forcast
     def get_forecast(self):
         '''Returns forecast'''
         return self.forecast
     def set_forecast(self, forecast):
         '''Sets forecast'''
         self.forecast = forecast
+    # humidity   
     def get_humidity(self):
         '''Returns humidity'''
         return self.humidity
     def set_humidity(self, humidity):
         '''Sets humidity'''
         self.humidity = humidity
+    # temp_min   
     def get_temp_min(self):
         '''Returns temp_min'''
         return self.temp_min
@@ -73,12 +81,15 @@ class LocationWeather():
         '''This calls the get_response_json and formatted/displays json data.'''
         json_data = self.get_response_json()
         if json_data == 'Not Found':
+            # fail, requested location returned no info
             print('Request to OpenWeatherMap was not successful.')
             print('Requested location was not found. Please check input and try again.')
         elif json_data is None:
+            # fail, other issue occurred with request
             print('Request to OpenWeatherMap was not successful.')
             print('Sorry, there was an error with retrieving weather. Please try again.')
         else:
+            # success, prints out readable weather info
             print('Request to OpenWeatherMap was successful.')
             print()
             self.set_weather_attributes(json_data)     

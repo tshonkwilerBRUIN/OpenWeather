@@ -6,8 +6,10 @@ def is_zip_code(zipcode):
     '''Checks to see if input is a zipcode. Returns True/False'''
     zip_check = zipcode.replace(' ', '')
     zip_check = zip_check.replace('-', '')
+    # false if zipcode is not five or nine characters long
     if len(zip_check) != 5 and len(zip_check) != 9:
         return False
+    # false if alpha character in zip
     for i in range(len(zip_check)):
         if zip_check[i].isalpha():
             return False
@@ -17,10 +19,13 @@ def go_again():
     '''Asks user if they wish to go again or quit'''
     while True:
         keep_going = input('Do you want to search again? (y/n) ')
+        # y or yes to search again
         if keep_going.lower() == 'y' or keep_going.lower() == 'yes':
             return True
+        # n or no to end program
         elif keep_going.lower() == 'n' or keep_going.lower() == 'no':
             return False
+        # ask again
         else:
             continue
 
@@ -45,10 +50,12 @@ def check_usa_state(state_name):
 
 def usa_state_names():
     '''Returns tuple of USA state names'''
+    # try to pull state names from file
     try:
         with open('state_names.txt') as f:
             reader = csv.reader(f, delimiter=',')
             state_names = list(reader)
+    # if issue with file, use default tuple
     except Exception:
         state_names = ('Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 
                        'Connecticut','Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
@@ -66,10 +73,12 @@ def usa_state_names():
 
 def usa_state_abbreviations():
     '''Returns tupe of USA state abbreviations'''
+    # try to pull state abbreviations from file
     try:     
         with open('state_abbreviations.txt') as f:
          reader = csv.reader(f, delimiter=',')
         state_abbreviations = list(reader)
+    # if issue with file, use default tuple
     except Exception:
         state_abbreviations = ('AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 
                                'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
